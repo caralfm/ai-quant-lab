@@ -215,6 +215,17 @@ function runValidation() {
 
 // ===== 初始化 =====
 async function init() {
+  // 检查 echarts 是否加载
+  if (typeof echarts === "undefined") {
+    document.body.insertAdjacentHTML("afterbegin",
+      '<div style="background:#fff3cd;color:#856404;padding:16px;text-align:center;font-size:14px;border-bottom:2px solid #ffc107">'
+      + '⚠️ ECharts 图表库加载失败，请检查网络连接。<br/>'
+      + '<small>如果你在使用 <code>file://</code> 协议打开此文件，请改用本地 HTTP 服务：<br/>'
+      + '<code>python3 -m http.server 8765</code> 然后访问 <code>http://localhost:8765</code></small>'
+      + '</div>');
+    return;
+  }
+
   // 检查数据
   if (!window.STOCK_DATA) {
     document.body.insertAdjacentHTML("afterbegin",

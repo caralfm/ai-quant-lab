@@ -182,7 +182,11 @@ input[type="range"] {
   padding: 6px;
   display: flex; flex-direction: column;
   overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
+.chart-card.main { flex: 1.5; }
+.chart-card.sub  { flex: 1; }
 .chart-title {
   padding: 4px 8px; font-size: 12px; color: var(--text-secondary);
   display: flex; align-items: center; gap: 12px;
