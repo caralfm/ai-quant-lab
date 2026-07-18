@@ -1,0 +1,20 @@
+# 标的清单 (Universe)
+# 由 stock_data_spec.md v1.0 定义
+# 修改此文件即可新增/删除标的，取数脚本自动读取
+
+universe:
+  - ts_code: "300604.SZ"
+    name: "长川科技"
+    market: "创业板"
+    sector: "半导体测试设备"
+    chain_role: "midstream_device"
+  - ts_code: "688008.SH"
+    name: "澜起科技"
+    market: "科创板"
+    sector: "内存接口芯片"
+    chain_role: "upstream_chip"
+  - ts_code: "000977.SZ"
+    name: "浪潮信息"
+    market: "深主板"
+    sector: "服务器/算力"
+    chain_role: "downstream_compute"
