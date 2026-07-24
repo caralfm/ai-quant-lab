@@ -223,7 +223,7 @@ def main():
         sys.exit(0)
     else:
         print("⏭️  数据已是最新，无需更新")
-        sys.exit(1)  # 退出码 1 表示无变更，Actions 可据此跳过后续步骤
+        sys.exit(0)  # 数据已最新，正常退出
 
 
 if __name__ == "__main__":
