@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>指标实验室 · 交互式技术指标计算工具</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"
+        onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js'"
+></script>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <a href="../../" class="back-link">← AI Quant Lab</a>
+  <div class="sep"></div>
+  <div class="logo"><span class="logo-dot"></span>指标实验室</div>
+  <div class="sep"></div>
+  <div class="field">
+    <label>股票</label>
+    <select id="stockSel">
+      <option value="300604.SZ" selected>300604.SZ 长川科技 · 创业板</option>
+      <option value="688008.SH">688008.SH 澜起科技 · 科创板</option>
+      <option value="000977.SZ">000977.SZ 浪潮信息 · 深主板</option>
+    </select>
+  </div>
+  <button class="btn" id="resetBtn">重置参数</button>
+  <button class="btn" id="validateBtn">运行验证</button>
+  <button class="btn btn-primary" id="exportBtn">导出 PNG</button>
+  <div class="price-badge">
+    <span class="price-now mono" id="priceNow">¥—</span>
+    <span class="price-chg mono" id="priceChg">—</span>
+  </div>
+</div>
+
+<!-- 视图tab -->
+<div class="viewtabs">
+  <div class="viewtab active" data-view="rsi">RSI</div>
+  <div class="viewtab" data-view="macd">MACD</div>
+  <div class="viewtab" data-view="bollinger">布林带</div>
+  <div class="viewtab" data-view="atr">ATR</div>
+  <div class="viewtab" data-view="overview">综合</div>
+</div>
+
+<!-- 验证横幅 -->
+<div class="val-banner" id="validationBanner" style="display:none"></div>
+
+<!-- 主体 -->
+<div class="layout">
+  <!-- 左侧参数面板 -->
+  <div class="sidebar">
+
+    <!-- RSI -->
+    <div class="param-group active" data-group="rsi">
+      <div class="param-head">RSI · 相对强弱<span class="chev">▾</span></div>
+      <div class="param-body">
+        <div class="param-row">
+          <div class="lbl">周期 <span class="val" id="rsiPVal">14</span></div>
+          <input type="range" min="2" max="30" value="14" id="rsiP">
+        </div>
+        <div class="param-row">
+          <div class="lbl">超买阈值 <span class="val" id="rsiObVal">70</span></div>
+          <input type="range" min="60" max="90" value="70" id="rsiOb">
+        </div>
+        <div class="param-row">
+          <div class="lbl">超卖阈值 <span class="val" id="rsiOsVal">30</span></div>
+          <input type="range" min="10" max="40" value="30" id="rsiOs">
+        </div>
+        <div class="presets">
+          <span class="preset-chip sel">经典14</span>
+          <span class="preset-chip">短线7</span>
+          <span class="preset-chip">长线21</span>
+        </div>
+        <div class="decision-note">Wilder α=1/n（D2）</div>
+      </div>
+    </div>
+
+    <!-- MACD -->
+    <div class="param-group collapsed" data-group="macd">
+      <div class="param-head">MACD · 趋势动量<span class="chev">▾</span></div>
+      <div class="param-body">
+        <div class="param-row">
+          <div class="lbl">快线 EMA <span class="val" id="macdFastVal">12</span></div>
+          <input type="range" min="5" max="20" value="12" id="macdFast">
+        </div>
+        <div class="param-row">
+          <div class="lbl">慢线 EMA <span class="val" id="macdSlowVal">26</span></div>
+          <input type="range" min="15" max="40" value="26" id="macdSlow">
+        </div>
+        <div class="param-row">
+          <div class="lbl">信号线 <span class="val" id="macdSigVal">9</span></div>
+          <input type="range" min="3" max="15" value="9" id="macdSig">
+        </div>
+        <div class="presets">
+          <span class="preset-chip sel">经典12/26/9</span>
+          <span class="preset-chip">短线5/35/5</span>
+        </div>
+        <div class="decision-note">hist = DIF − DEA（不乘2，D1）</div>
+      </div>
+    </div>
+
+    <!-- 布林带 -->
+    <div class="param-group collapsed" data-group="bollinger">
+      <div class="param-head">布林带 · 波动通道<span class="chev">▾</span></div>
+      <div class="param-body">
+        <div class="param-row">
+          <div class="lbl">周期 <span class="val" id="bbPVal">20</span></div>
+          <input type="range" min="10" max="30" value="20" id="bbP">
+        </div>
+        <div class="param-row">
+          <div class="lbl">σ 倍数 <span class="val" id="bbKVal">2.0</span></div>
+          <input type="range" min="10" max="30" value="20" id="bbK" step="1">
+        </div>
+        <div class="presets">
+          <span class="preset-chip sel">经典20/2</span>
+          <span class="preset-chip">窄带10/1.5</span>
+        </div>
+        <div class="decision-note">标准差 ddof=0（D3）</div>
+      </div>
+    </div>
+
+    <!-- ATR -->
+    <div class="param-group collapsed" data-group="atr">
+      <div class="param-head">ATR · 真实波幅<span class="chev">▾</span></div>
+      <div class="param-body">
+        <div class="param-row">
+          <div class="lbl">周期 <span class="val" id="atrPVal">14</span></div>
+          <input type="range" min="5" max="30" value="14" id="atrP">
+        </div>
+        <div class="param-row">
+          <div class="lbl">止损倍数 <span class="val" id="atrMVal">1.5</span></div>
+          <input type="range" min="10" max="30" value="15" id="atrM" step="1">
+        </div>
+        <div class="presets">
+          <span class="preset-chip sel">经典14</span>
+          <span class="preset-chip">保守20/2</span>
+        </div>
+        <div class="decision-note">Wilder 平滑 α=1/n（D2）</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      warmup 期保留空值（D4）<br>涨红跌绿 · A 股惯例<br>参数变化即时重算
+    </div>
+  </div>
+
+  <!-- 图表区 -->
+  <div class="chart-area">
+    <div class="chart-card main">
+      <div class="chart-title">
+        <span>主图 · K线 + 布林带叠加</span>
+        <span class="tag" id="mainTag">长川科技</span>
+        <span class="tag" style="color:var(--up)">● 涨红</span>
+        <span class="tag" style="color:var(--down)">● 跌绿</span>
+      </div>
+      <div id="mainChart" style="width:100%;height:100%"></div>
+    </div>
+    <div class="chart-card sub">
+      <div class="chart-title">
+        <span id="subTitle">副图 · RSI(14)</span>
+        <span class="tag" id="subTag">动量振荡器</span>
+      </div>
+      <div id="subChart" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 底栏表格 -->
+<div class="bottombar">
+  <h4>最近 10 个交易日 · 指标值表</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>日期</th><th>收盘</th><th>涨跌幅</th><th>RSI(14)</th><th>MACD DIF</th><th>MACD hist</th><th>BB %B</th><th>ATR(14)</th>
+      </tr>
+    </thead>
+    <tbody id="valTable"></tbody>
+  </table>
+</div>
+
+<!-- 脚本 (顺序: config → data → indicators → render → app) -->
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/indicators.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

@@ -1,20 +1,39 @@
 # AI Quant Lab
 
-A股技术指标交互式实验室 — 选股、算指标、调参数、实时重绘。
+量化策略实验室 — 作品集站点。聚合 A 股技术指标、经典策略回测、机器学习模型等量化项目。
 
-## 项目概览
+## 在线访问
 
-本项目以 **长川科技 (300604.SZ)、澜起科技 (688008.SH)、浪潮信息 (000977.SZ)** 三只 AI算力/半导体产业链股票为样本，构建了一套从数据采集到指标计算到交互式可视化的完整工具链。
+🌐 **[caralfm.github.io/ai-quant-lab](https://caralfm.github.io/ai-quant-lab/)**
 
-### 核心交付物
+## 已上线策略
 
-| 模块 | 说明 | 路径 |
+| 策略 | 说明 | 链接 |
 |------|------|------|
-| 交互式指标工具 | 纯浏览器端 SPA，选股+调参+实时重绘 | `interactive_tool/` |
-| 指标计算 Notebook | RSI/MACD/布林带/ATR 手写实现，含教学讲解 | `notebooks/` |
-| 取数脚本 | Tushare REST API 批量取数，含降级与校验 | `scripts/` |
-| 规范文档 | 取数规范 + 指标规范 + 工具设计规范 | `specs/` |
-| 数值验证 | 工具算法与 Notebook CSV 逐点比对 (容差 1e-6) | `tests/` |
+| 🐢 海龟回测看板 | S1/S2 双系统回测 · ATR仓位管理 · 买卖点可视化 | `strategies/turtle-backtest/` |
+| 📊 指标实验室 | RSI / MACD / 布林带 / ATR 交互式计算 | `strategies/indicator-lab/` |
+
+## 项目结构
+
+```
+ai-quant-lab/
+├── index.html                   # 首页（作品集展示）
+├── css/home.css                 # 首页样式
+├── strategies/
+│   ├── indicator-lab/           # 指标实验室
+│   │   ├── index.html
+│   │   ├── css/ + js/
+│   └── turtle-backtest/         # 海龟回测看板
+│       ├── index.html
+│       ├── css/ + js/ + data/
+├── specs/                       # 设计规范文档
+├── notebooks/                   # Jupyter Notebook
+├── scripts/                     # 数据脚本
+├── tests/                       # 数值验证
+├── data/                        # 原始数据
+├── .github/workflows/           # Pages 自动部署
+└── README.md
+```
 
 ## 快速开始
 

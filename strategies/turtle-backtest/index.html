@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海龟交易回测看板 · Turtle Backtest</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ═══════════ 顶栏 ═══════════ -->
+<header class="topbar">
+  <a href="../../" class="back-link">← AI Quant Lab</a>
+  <span class="sep"></span>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    海龟回测
+  </div>
+  <span class="sep"></span>
+
+  <div class="field">
+    <label>标的</label>
+    <select id="stock-select">
+      <option value="300604.SZ">长川科技 (300604)</option>
+      <option value="688008.SH">澜起科技 (688008)</option>
+      <option value="000977.SZ">浪潮信息 (000977)</option>
+    </select>
+  </div>
+
+  <span class="sep"></span>
+
+  <div class="field">
+    <label>起</label>
+    <input type="date" id="date-start">
+  </div>
+  <div class="field">
+    <label>止</label>
+    <input type="date" id="date-end">
+  </div>
+
+  <div class="quick-btns">
+    <button class="btn" data-range="1y">1年</button>
+    <button class="btn" data-range="2y">2年</button>
+    <button class="btn" data-range="5y">5年</button>
+    <button class="btn active" data-range="all">全部</button>
+  </div>
+
+  <div class="field" style="margin-left:8px">
+    <label>K线视图</label>
+    <button class="btn active" id="view-s1">S1</button>
+    <button class="btn" id="view-s2">S2</button>
+  </div>
+
+  <div class="topbar-right">
+    <button class="btn" id="btn-export">导出CSV</button>
+    <button class="btn btn-primary" id="btn-update">更新数据 🔄</button>
+  </div>
+</header>
+
+<!-- ═══════════ 主布局 ═══════════ -->
+<div class="main-layout">
+
+  <!-- 左侧参数面板 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" id="sidebar-toggle" title="折叠面板">◀ 参数</div>
+
+    <div class="param-preset">
+      <div class="sidebar-title">预设方案</div>
+      <select id="preset-select" style="width:100%">
+        <option value="both" selected>双系统 (S1+S2)</option>
+        <option value="s1">原版 S1 (20/10)</option>
+        <option value="s2">原版 S2 (55/20)</option>
+      </select>
+    </div>
+
+    <!-- S1 参数 -->
+    <div class="param-group">
+      <div class="param-group-title">▼ System 1 (短期)</div>
+      <div class="check-row">
+        <input type="checkbox" id="s1-toggle" checked>
+        <label for="s1-toggle">启用 S1</label>
+      </div>
+      <div class="param-row">
+        <label>入场周期</label>
+        <input type="range" id="entry-s1" min="5" max="120" value="20" step="1">
+        <input type="number" id="entry-s1-num" value="20" min="5" max="120">
+      </div>
+      <div class="param-row">
+        <label>出场周期</label>
+        <input type="range" id="exit-s1" min="3" max="60" value="10" step="1">
+        <input type="number" id="exit-s1-num" value="10" min="3" max="60">
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="s1-filter" checked>
+        <label for="s1-filter">上一笔亏损跳过</label>
+      </div>
+    </div>
+
+    <!-- S2 参数 -->
+    <div class="param-group">
+      <div class="param-group-title">▼ System 2 (长期)</div>
+      <div class="check-row">
+        <input type="checkbox" id="s2-toggle" checked>
+        <label for="s2-toggle">启用 S2</label>
+      </div>
+      <div class="param-row">
+        <label>入场周期</label>
+        <input type="range" id="entry-s2" min="10" max="240" value="55" step="1">
+        <input type="number" id="entry-s2-num" value="55" min="10" max="240">
+      </div>
+      <div class="param-row">
+        <label>出场周期</label>
+        <input type="range" id="exit-s2" min="5" max="120" value="20" step="1">
+        <input type="number" id="exit-s2-num" value="20" min="5" max="120">
+      </div>
+    </div>
+
+    <!-- 通用参数 -->
+    <div class="param-group">
+      <div class="param-group-title">▼ 资金与风控</div>
+      <div class="param-row">
+        <label>ATR周期</label>
+        <input type="range" id="atr-period" min="5" max="60" value="20" step="1">
+        <input type="number" id="atr-period-num" value="20" min="5" max="60">
+      </div>
+      <div class="param-row">
+        <label>止损ATR</label>
+        <input type="range" id="stop-atr" min="0.5" max="5" value="2.0" step="0.1">
+        <span class="val" id="stop-atr-val">2.0</span>
+      </div>
+      <div class="param-row">
+        <label>加仓间距</label>
+        <input type="range" id="add-unit" min="0.25" max="3" value="0.5" step="0.25">
+        <span class="val" id="add-unit-val">0.5</span>
+      </div>
+      <div class="param-row">
+        <label>最大单位</label>
+        <input type="range" id="max-units" min="1" max="8" value="4" step="1">
+        <span class="val" id="max-units-val">4</span>
+      </div>
+      <div class="param-row">
+        <label>初始资金</label>
+        <input type="range" id="init-capital" min="100000" max="10000000" value="1000000" step="100000">
+        <span class="val" id="init-capital-val">100万</span>
+      </div>
+      <div class="param-row">
+        <label>单笔风险</label>
+        <input type="range" id="risk-per-unit" min="0.005" max="0.05" value="0.01" step="0.005">
+        <span class="val" id="risk-per-unit-val">1%</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 右侧内容区 -->
+  <main class="content" id="content">
+
+    <!-- 回测指标卡片 -->
+    <section class="metrics-section" id="metrics-container">
+      <div class="metrics-col" style="border-left:4px solid #185FA5">
+        <h3><span class="sys-tag">S1 (20/10)</span></h3>
+        <div class="metrics-grid" id="metrics-s1">
+          <div class="metric-item"><span class="ml">加载中...</span></div>
+        </div>
+      </div>
+      <div class="metrics-col" style="border-left:4px solid #BA7517">
+        <h3><span class="sys-tag">S2 (55/20)</span></h3>
+        <div class="metrics-grid" id="metrics-s2">
+          <div class="metric-item"><span class="ml">加载中...</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- K线图 -->
+    <section class="chart-card full">
+      <div class="chart-inner" id="chart-kline"></div>
+    </section>
+
+    <!-- 资金曲线 + 回撤曲线 -->
+    <section class="chart-row">
+      <div class="chart-card">
+        <div class="chart-inner half" id="chart-equity"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-inner half" id="chart-drawdown"></div>
+      </div>
+    </section>
+
+    <!-- 交易明细表 -->
+    <section class="table-card">
+      <h3>交易明细 <span style="font-weight:400;color:var(--text-tertiary);font-size:12px" id="trade-count">0 笔</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>系统</th>
+              <th>入场日</th>
+              <th>出场日</th>
+              <th>入场价</th>
+              <th>出场价</th>
+              <th>收益率</th>
+              <th>持仓天</th>
+              <th>出场原因</th>
+              <th>加仓</th>
+            </tr>
+          </thead>
+          <tbody id="trade-tbody">
+            <tr><td colspan="9" style="text-align:center;color:#999;padding:20px;">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 状态栏 -->
+    <div class="status-bar" id="data-status">
+      <span class="status-dot"></span> 等待加载...
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════ Scripts ═══════════ -->
+<script src="js/indicators.js"></script>
+<script src="js/metrics.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/data-loader.js"></script>
+<script src="js/chart-kline.js"></script>
+<script src="js/chart-equity.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

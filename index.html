@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Quant Lab · 量化策略实验室</title>
+<link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+<!-- ═══════════ Hero ═══════════ -->
+<header class="hero">
+  <div class="hero-icon">🧪</div>
+  <h1>AI Quant Lab</h1>
+  <p class="subtitle">量化策略实验室</p>
+  <div class="tags">
+    <span class="tag">A股技术指标</span>
+    <span class="tag">经典策略回测</span>
+    <span class="tag">机器学习</span>
+    <span class="tag">可视化分析</span>
+  </div>
+</header>
+
+<!-- ═══════════ 策略列表 ═══════════ -->
+<main class="strategies">
+
+  <!-- 活跃策略 -->
+  <div class="section-title">📦 已上线策略</div>
+  <div class="strategy-grid" id="active-grid"></div>
+
+  <!-- 即将推出 -->
+  <div class="section-title" style="margin-top:40px">🔮 开发中</div>
+  <div class="strategy-grid" id="coming-grid"></div>
+
+</main>
+
+<!-- ═══════════ 页脚 ═══════════ -->
+<footer class="footer">
+  <p>AI Quant Lab · 数据来源 Tushare · 仅用于学习研究</p>
+  <p style="margin-top:4px">
+    <a href="https://github.com/caralfm/ai-quant-lab" target="_blank">GitHub</a>
+  </p>
+</footer>
+
+<script>
+// ===== 策略注册表 =====
+const strategies = [
+  // --- 已上线 ---
+  {
+    id: 'turtle-backtest',
+    name: '海龟回测看板',
+    icon: '🐢',
+    description: '基于 Richard Dennis 海龟交易法则的双系统回测，含 ATR 仓位管理、加仓金字塔与买卖点可视化。',
+    tags: ['海龟法则', 'S1/S2双系统', 'ATR仓位', '回测'],
+    url: 'strategies/turtle-backtest/',
+    status: 'active',
+  },
+  {
+    id: 'indicator-lab',
+    name: '指标实验室',
+    icon: '📊',
+    description: 'RSI / MACD / 布林带 / ATR 四项经典技术指标的交互式计算与可视化，实时调参即时反馈。',
+    tags: ['RSI', 'MACD', '布林带', 'ATR'],
+    url: 'strategies/indicator-lab/',
+    status: 'active',
+  },
+  // --- 开发中 ---
+  {
+    id: 'factor-screener',
+    name: '因子选股器',
+    icon: '🔍',
+    description: '多因子筛选 + 排名 + 组合回测，一键从全市场找出符合多维度条件的股票。',
+    tags: ['多因子', '选股', '排序'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'ml-classifier',
+    name: 'ML 分类预测',
+    icon: '🤖',
+    description: '基于 sklearn 的机器学习分类模型对比：逻辑回归、SVM、随机森林、XGBoost，含特征工程与交叉验证。',
+    tags: ['ML', '分类', '特征工程', '交叉验证'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'mean-reversion',
+    name: '均值回归策略',
+    icon: '📈',
+    description: '基于布林带和 RSI 的均值回归交易策略回测，含多参数网格搜索与样本外验证。',
+    tags: ['均值回归', '布林带', 'RSI', '参数优化'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'grid-trading',
+    name: '网格交易回测',
+    icon: '🕸️',
+    description: '自动化网格交易策略回测引擎：等差/等比网格、动态网格调整、资金利用率分析。',
+    tags: ['网格交易', '等差', '等比', '资金管理'],
+    status: 'coming-soon',
+  },
+];
+
+// ===== 渲染卡片 =====
+function renderCards(gridId, status) {
+  const grid = document.getElementById(gridId);
+  const items = strategies.filter(s => s.status === status);
+
+  for (const s of items) {
+    const card = document.createElement('div');
+    card.className = 'card' + (s.status === 'coming-soon' ? ' coming-soon' : '');
+
+    let badges = '';
+    if (s.status === 'coming-soon') {
+      badges = '<span class="badge">开发中</span>';
+    }
+
+    card.innerHTML = `
+      <div class="icon">${s.icon}</div>
+      ${badges}
+      <div class="name">${s.name}</div>
+      <div class="desc">${s.description}</div>
+      <div class="card-tags">
+        ${s.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+      </div>
+      ${s.url && s.url !== '#' ? `<a href="${s.url}" class="link">进入 →</a>` : ''}
+    `;
+
+    grid.appendChild(card);
+  }
+}
+
+renderCards('active-grid', 'active');
+renderCards('coming-grid', 'coming-soon');
+</script>
+
+</body>
+</html>
